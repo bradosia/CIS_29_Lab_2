@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>410</x>
+      <y>170</y>
+      <w>490</w>
+      <h>280</h>
+    </coordinates>
+    <panel_attributes>Parser
+--
+unsigned int fileSize
+unsigned int filePos
+unsigned int charWritten
+unsigned int ignoreNum
+char bufferInChar[2]
+char bufferOutChar[2]
+char spaceChar[2]
+string streamBuffer
+bool spaceWrite
+--
+Parser()
+~Parser()
+bool morseBinaryToChar(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)
+bool bufferHandle()
+string byteToBitString(char byteIn)
+int bitStringFind(string space)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>670</y>
+      <w>390</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>MorseBinaryCharTable
+--
+vector&lt;string&gt; charIntToBinaryStringTable
+vector&lt;char&gt; binaryIntToCharTable
+const string dashBinary = "01"
+const string dotBinary = "10"
+--
+MorseBinaryCharTable()
+~MorseBinaryCharTable()
+void buildBinaryIntToCharTable();
+bool binaryIntToChar(unsigned int binaryInt, char&amp; charOut);</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>470</x>
+      <y>490</y>
+      <w>360</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>MorseBinary
+--
+unsigned int binaryInt
+MorseBinaryCharTable binaryCharTable
+--
+MorseBinary(string morse)
+~MorseBinary()
+bool toChar(char&amp; charOut)
+bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>650</x>
+      <y>440</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>650</x>
+      <y>620</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>0</y>
+      <w>390</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>FileHandler
+--
+
+--
+FileHandler()
+~FileHandler()
+bool readLines(string fileName, ifstream&amp; fileStream)
+bool writeLines(string fileName, ofstream&amp; fileStream)
+bool close(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>150</x>
+      <y>40</y>
+      <w>230</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>UML Diagram
+Lab 1 - Bitsets and Vectors
+Morse Binary Code Decoder
+By: Branden Lee</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
