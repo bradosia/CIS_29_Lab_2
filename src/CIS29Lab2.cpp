@@ -10,6 +10,7 @@
 #include <iostream>     // std::cout
 #include <vector>       // std::vector
 #include <bitset>
+#include <list>
 using namespace std;
 
 /**
@@ -33,6 +34,13 @@ public:
 	bool readLines(string fileName, ifstream& fileStream);
 	bool writeLines(string fileName, ofstream& fileStream);
 	bool close(ifstream& fileStreamIn, ofstream& fileStreamOut);
+};
+
+
+class XMLNode {
+private:
+	string value; // non-child-node inside node <></>
+	list<XMLNode> childNodes;
 };
 
 /**
