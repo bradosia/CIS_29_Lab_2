@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="14.2.0">
-  <zoom_level>10</zoom_level>
+  <zoom_level>9</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>410</x>
-      <y>170</y>
-      <w>490</w>
-      <h>280</h>
+      <x>315</x>
+      <y>351</y>
+      <w>441</w>
+      <h>261</h>
     </coordinates>
     <panel_attributes>Parser
 --
@@ -26,16 +26,17 @@ Parser()
 bool morseBinaryToChar(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)
 bool bufferHandle()
 string byteToBitString(char byteIn)
-int bitStringFind(string space)</panel_attributes>
+int bitStringFind(string space)
+bool xmlParse(istream&amp; streamIn, XMLNode&amp; xmlDoc)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>670</y>
-      <w>390</w>
-      <h>170</h>
+      <x>351</x>
+      <y>810</y>
+      <w>351</w>
+      <h>153</h>
     </coordinates>
     <panel_attributes>MorseBinaryCharTable
 --
@@ -53,10 +54,10 @@ bool binaryIntToChar(unsigned int binaryInt, char&amp; charOut);</panel_attribut
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>470</x>
-      <y>490</y>
-      <w>360</w>
-      <h>140</h>
+      <x>360</x>
+      <y>648</y>
+      <w>324</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>MorseBinary
 --
@@ -72,21 +73,21 @@ bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>650</x>
-      <y>440</y>
-      <w>30</w>
-      <h>70</h>
+      <x>522</x>
+      <y>603</y>
+      <w>36</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;50.0;20.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>650</x>
-      <y>620</y>
-      <w>30</w>
-      <h>70</h>
+      <x>522</x>
+      <y>765</y>
+      <w>27</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
@@ -94,10 +95,10 @@ bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>0</y>
-      <w>390</w>
-      <h>140</h>
+      <x>351</x>
+      <y>207</y>
+      <w>351</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>FileHandler
 --
@@ -113,14 +114,14 @@ bool close(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)</panel_attri
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>150</x>
-      <y>40</y>
-      <w>230</w>
-      <h>80</h>
+      <x>0</x>
+      <y>261</y>
+      <w>243</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>UML Diagram
-Lab 1 - Bitsets and Vectors
-Morse Binary Code Decoder
+Lab 2 - Containers and Regex
+Code3of9 Symbology in XML Container
 By: Branden Lee</panel_attributes>
     <additional_attributes/>
   </element>

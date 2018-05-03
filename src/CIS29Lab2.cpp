@@ -1,8 +1,8 @@
 //============================================================================
-// Name        : Lab1
+// Name        : Lab2
 // Author      : Branden Lee
-// Date        : 4/22/2018
-// Description : Decode morse binary code
+// Date        : 5/02/2018
+// Description : Decoding Code3of9 Symbology in XML files
 //============================================================================
 
 #include <string>
@@ -11,6 +11,7 @@
 #include <vector>       // std::vector
 #include <bitset>
 #include <list>
+#include <regex>
 using namespace std;
 
 /**
@@ -35,7 +36,6 @@ public:
 	bool writeLines(string fileName, ofstream& fileStream);
 	bool close(ifstream& fileStreamIn, ofstream& fileStreamOut);
 };
-
 
 class XMLNode {
 private:
@@ -95,6 +95,7 @@ public:
 	bool bufferHandle();
 	string byteToBitString(char byteIn);
 	int bitStringFind(string space);
+	bool xmlParse(istream& streamIn, XMLNode& xmlDoc);
 };
 
 /*
@@ -346,6 +347,35 @@ int Parser::bitStringFind(string space) {
 		}
 	}
 	return pos;
+}
+
+bool Parser::xmlParse(istream& streamIn, XMLNode& xmlDoc) {
+	/* <primaryAddress>[\s\S]*?<\/primaryAddress>
+	 * 1. create document node. If stack is empty then document node is the parent.
+	 * 2. grab first <tag> and add push on stack.
+	 *    future nodes will be a child of top of the stack
+	 * 3. grab child node and push it to the stack.
+	 * 4. value between <child></child> is added to the node on top of the stack
+	 * 5. if </tag> found then it is popped off the stack
+	 * */
+	streamIn.seekg(0, ios::end); // set the pointer to the end
+	fileSize = streamIn.tellg(); // get the length of the file
+	streamIn.seekg(0, ios::beg); // set the pointer to the beginning
+	/* because we are using regex, we need to read the entire file into memory.
+	 * I personally would never use regex to parse XML, but for the assignment I will do so
+	 */
+	char XMLData[fileSize];
+	streamIn.read(XMLData, fileSize);
+	std::string XMLDataString = XMLData;
+	std::smatch m;
+	std::regex e("<[\s\S]*?>");   // matches words beginning by "sub"
+
+	while (regex_search(XMLDataString, m, e)) {
+		for (auto x : m)
+			std::cout << x << " ";
+		std::cout << std::endl;
+		s = m.suffix().str();
+	}
 }
 
 /*
