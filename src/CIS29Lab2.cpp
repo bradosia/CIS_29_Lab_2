@@ -12,6 +12,7 @@
 #include <bitset>
 #include <list>
 #include <regex>
+#include <stack>
 using namespace std;
 
 /**
@@ -34,192 +35,150 @@ public:
 	 */
 	bool readLines(string fileName, ifstream& fileStream);
 	bool writeLines(string fileName, ofstream& fileStream);
-	bool close(ifstream& fileStreamIn, ofstream& fileStreamOut);
+	bool close(fstream& fileStreamIn, fstream& fileStreamOut);
 };
 
+/**
+ @class HashTable
+ A simple hash table \n
+ */
+template<class T>
+class HashTable {
+private:
+	vector<pair<int, T>> table;
+public:
+	HashTable();
+	HashTable(int size);
+	~HashTable() {
+	}
+	bool insert(int key, T val);
+	T at(int key);
+	int hash(int key);
+};
+
+/**
+ @class XMLNode
+ XML document node \n
+ */
 class XMLNode {
 private:
-	string value; // non-child-node inside node <></>
-	list<XMLNode> childNodes;
+	string name; // tag name inside the angled brackets <name>
+	string value; // non-child-node inside node <>value</>
+	list<XMLNode*> childNodes;
+	XMLNode* parentNode;
+public:
+	XMLNode();
+	XMLNode(string name_, XMLNode* parentNode_);
+	~XMLNode() {
+	}
+	void valueAppend(string str);
+	string getValue();
+	XMLNode* getParent();
+	XMLNode* addChild(string str);
+	XMLNode* getChild(unsigned int index);
 };
 
 /**
- @class MorseBinaryCharTable
- It converts hexadecimals to chars \n
+ @class XMLParser
+ XML document parser \n
  */
-class MorseBinaryCharTable {
+class XMLParser {
 private:
-	vector<string> charIntToBinaryStringTable;
-	vector<char> binaryIntToCharTable;
-	const string dashBinary = "01";
-	const string dotBinary = "10";
+	unsigned int fileSize, filePos;
+	char bufferInChar[2];
+	string streamBuffer;
 public:
-	MorseBinaryCharTable();
-	~MorseBinaryCharTable() {
+	XMLParser();
+	~XMLParser() {
 	}
-	void buildBinaryIntToCharTable();
-	bool binaryIntToChar(unsigned int binaryInt, char& charOut);
+	bool documentStream(istream& streamIn, XMLNode& xmlDoc);
 };
 
 /**
- @class MorseBinary
- Utilities for pairs of degree angles \n
+ @class Code39CharTable
+ A table to convert Code 39 integers to characters \n
  */
-class MorseBinary {
+class Code39CharTable {
 private:
-	unsigned int binaryInt;
-	MorseBinaryCharTable binaryCharTable;
+	vector<unsigned int> charIntToCode39IntTable;
+	vector<char> Code39IntToCharTable;
 public:
-	MorseBinary(string morse);
-	~MorseBinary() {
+	Code39CharTable();
+	~Code39CharTable() {
 	}
-	bool toChar(char& charOut);
-	bool bitStringToInt(string morse, unsigned int& intOut);
+	void buildCode39IntToCharTable();
+	bool Code39IntToChar(unsigned int binaryInt, char& charOut);
+};
+
+class Product {
+private:
+	string name;
+	double price;
+	unsigned int code39IntItem[5];
+public:
+	string printString();
+};
+
+class ProductTable {
+private:
+	HashTable<Product> code39ItemToProductTable;
+public:
+	string printString();
+};
+
+class Cart {
+private:
+	vector<Product> productList;
+public:
+	string printString();
+};
+
+class CartList {
+private:
+	vector<Cart> cartList;
+public:
+	string printString();
+};
+
+/**
+ @class Code39IntItem
+ Converts a Code 39 Item to the a product \n
+ */
+class Code39IntItem {
+private:
+	Code39CharTable* code39CharTable;
+	string code39StringItem;
+	unsigned int code39IntItem[5];
+public:
+	Code39IntItem(string code39StringItem_,
+			Code39CharTable* code39CharTablePtr);
+	~Code39IntItem() {
+	}
+	bool toProduct(Product& productObj);
+	bool toInt(unsigned int* code39IntItem);
 };
 
 /**
  @class Parser
- Utilities for stream decoding \n
+ Miscellaneous utilities for parsing data structures \n
  */
 class Parser {
 private:
-	unsigned int fileSize, filePos, charWritten, ignoreNum;
-	char bufferInChar[2], bufferOutChar[2], spaceChar[2];
-	string streamBuffer;
-	bool spaceWrite;
+	Code39CharTable code39CharTable;
 public:
 	Parser();
 	~Parser() {
 	}
-	bool morseBinaryToChar(ifstream& fileStreamIn, ofstream& fileStreamOut);
-	bool bufferHandle();
-	string byteToBitString(char byteIn);
-	int bitStringFind(string space);
-	bool xmlParse(istream& streamIn, XMLNode& xmlDoc);
+	bool productListXMLNodetoObject(const XMLNode& productListXMLNode,
+			ProductTable& cartListObject);
+	bool cartListXMLNodetoObject(const XMLNode& cartListXMLNode,
+			CartList& cartListObject);
 };
-
-/*
- * MorseBinaryCharTable Implementation
- */
-MorseBinaryCharTable::MorseBinaryCharTable() {
-	// Size of 128 to potentially hold ascii codes up to 128
-	charIntToBinaryStringTable.resize(128);
-	try {
-		charIntToBinaryStringTable[(int) 'A'] = ".-";
-		charIntToBinaryStringTable[(int) 'B'] = "-...";
-		charIntToBinaryStringTable[(int) 'C'] = "-.-.";
-		charIntToBinaryStringTable[(int) 'D'] = "-..";
-		charIntToBinaryStringTable[(int) 'E'] = ".";
-		charIntToBinaryStringTable[(int) 'F'] = "..-.";
-		charIntToBinaryStringTable[(int) 'G'] = "--.";
-		charIntToBinaryStringTable[(int) 'H'] = "....";
-		charIntToBinaryStringTable[(int) 'I'] = "..";
-		charIntToBinaryStringTable[(int) 'J'] = ".---";
-		charIntToBinaryStringTable[(int) 'K'] = "-.-";
-		charIntToBinaryStringTable[(int) 'L'] = ".-..";
-		charIntToBinaryStringTable[(int) 'M'] = "--";
-		charIntToBinaryStringTable[(int) 'N'] = "-.";
-		charIntToBinaryStringTable[(int) 'O'] = "---";
-		charIntToBinaryStringTable[(int) 'P'] = ".--.";
-		charIntToBinaryStringTable[(int) 'Q'] = "--.-";
-		charIntToBinaryStringTable[(int) 'R'] = ".-.";
-		charIntToBinaryStringTable[(int) 'S'] = "...";
-		charIntToBinaryStringTable[(int) 'T'] = "-";
-		charIntToBinaryStringTable[(int) 'U'] = "..-";
-		charIntToBinaryStringTable[(int) 'V'] = "...-";
-		charIntToBinaryStringTable[(int) 'W'] = ".--";
-		charIntToBinaryStringTable[(int) 'X'] = "-..-";
-		charIntToBinaryStringTable[(int) 'Y'] = "-.--";
-		charIntToBinaryStringTable[(int) 'Z'] = "--..";
-		charIntToBinaryStringTable[(int) '0'] = "-----";
-		charIntToBinaryStringTable[(int) '1'] = ".----";
-		charIntToBinaryStringTable[(int) '2'] = "..---";
-		charIntToBinaryStringTable[(int) '3'] = "...--";
-		charIntToBinaryStringTable[(int) '4'] = "....-";
-		charIntToBinaryStringTable[(int) '5'] = ".....";
-		charIntToBinaryStringTable[(int) '6'] = "-....";
-		charIntToBinaryStringTable[(int) '7'] = "--...";
-		charIntToBinaryStringTable[(int) '8'] = "---..";
-		charIntToBinaryStringTable[(int) '9'] = "----.";
-		charIntToBinaryStringTable[(int) '\''] = ".----.";
-		charIntToBinaryStringTable[(int) '@'] = ".--.-.";
-		charIntToBinaryStringTable[(int) ':'] = "---...";
-		charIntToBinaryStringTable[(int) ','] = "--..--";
-		charIntToBinaryStringTable[(int) '$'] = "...-..-";
-		charIntToBinaryStringTable[(int) '='] = "-...-";
-		charIntToBinaryStringTable[(int) '!'] = "-.-.--";
-		charIntToBinaryStringTable[(int) '.'] = ".-.-.-";
-		charIntToBinaryStringTable[(int) '?'] = "..--..";
-		charIntToBinaryStringTable[(int) '\"'] = ".-..-.";
-	} catch (...) {
-		// nothing
-	}
-	buildBinaryIntToCharTable();
-}
-
-void MorseBinaryCharTable::buildBinaryIntToCharTable() {
-	unsigned int i, j, n, n1;
-	string bitString;
-	/* 2^14 since $ has the longest binary representation at 14 bits
-	 * There is a lot of wasted spaces since we don't even have 2^14
-	 * values to store, but we want faster lookup performance compared to smaller memory usage.
-	 * Hashing would use less space, at the expense of a few CPU calculations */
-	binaryIntToCharTable.resize(16384);
-	// build a binary int to char map
-	n = charIntToBinaryStringTable.size();
-	for (i = 0; i < n; i++) {
-		bitString = "";
-		if ((n1 = charIntToBinaryStringTable[i].length()) > 0) {
-			for (j = 0; j < n1; j++) {
-				if (charIntToBinaryStringTable[i][j] == '-') {
-					bitString.append(dashBinary);
-				} else if (charIntToBinaryStringTable[i][j] == '.') {
-					bitString.append(dotBinary);
-				}
-			}
-			bitset<14> bits(bitString);
-			//cout << bits.to_ulong() << " " << char(i) << endl;
-			// we are worried of bits above 14
-			try {
-				binaryIntToCharTable[bits.to_ulong()] = char(i);
-			} catch (...) {
-				// nothing
-			}
-		}
-	}
-}
-
-bool MorseBinaryCharTable::binaryIntToChar(unsigned int binaryInt,
-		char& charOut) {
-	//cout << "binaryInt=" << binaryInt << endl;
-	try {
-		charOut = binaryIntToCharTable[binaryInt];
-		return true;
-	} catch (...) {
-		return false;
-	}
-}
-/*
- * MorseBinary Implementation
- */
-MorseBinary::MorseBinary(string morse) {
-	bitStringToInt(morse, binaryInt);
-}
-
-bool MorseBinary::toChar(char& charOut) {
-	return binaryCharTable.binaryIntToChar(binaryInt, charOut);
-}
-
-bool MorseBinary::bitStringToInt(string morse, unsigned int& intOut) {
-	bitset<14> bits(morse);
-	intOut = (unsigned int) bits.to_ulong();
-	return true;
-}
 
 /*
  * FileHandler Implementation
  */
-bool FileHandler::close(ifstream& fileStreamIn, ofstream& fileStreamOut) {
+bool FileHandler::close(fstream& fileStreamIn, fstream& fileStreamOut) {
 	fileStreamIn.close();
 	fileStreamOut.close();
 	return true;
@@ -242,114 +201,97 @@ bool FileHandler::writeLines(string fileName, ofstream& fileStream) {
 }
 
 /*
- * Parser Implementation
+ * HashTable Implementation
  */
-Parser::Parser() {
-	fileSize = filePos = charWritten = ignoreNum = 0;
-	bufferInChar[1] = bufferOutChar[1] = spaceChar[1] = 0;
+template<class T>
+HashTable<T>::HashTable() {
+	table.resize(100);
+}
+template<class T>
+HashTable<T>::HashTable(int size) {
+	table.resize(size);
+}
+template<class T>
+bool HashTable<T>::insert(int key, T val) {
+	int attempts = 3;
+	int keyOriginal = key;
+	bool flag = false;
+	for (; attempts > 0; attempts--) {
+		key = hash(key);
+		if (!table[key]) {
+			table[key].first = keyOriginal;
+			table[key].second = val;
+			break;
+		}
+	}
+	return flag;
+}
+template<class T>
+T HashTable<T>::at(int key) {
+	int attempts = 3;
+	int keyOriginal = key;
+	T ret;
+	for (; attempts > 0; attempts--) {
+		key = hash(key);
+		if (table[key] && table[key].first == keyOriginal) {
+			table[key].first = keyOriginal;
+			ret = table[key].second;
+			break;
+		}
+	}
+	return ret;
+}
+template<class T>
+int HashTable<T>::hash(int key) {
+	return (key * 2654435761) % table.size();
+}
+
+/*
+ * XMLNode Implementation
+ */
+XMLNode::XMLNode() {
+	name = "";
+	value = "";
+	parentNode = nullptr;
+}
+XMLNode::XMLNode(string name_, XMLNode* parentNode_) {
+	name = name_;
+	value = "";
+	parentNode = parentNode_;
+}
+void XMLNode::valueAppend(string str) {
+	value.append(str);
+}
+string XMLNode::getValue() {
+	return value;
+}
+XMLNode* XMLNode::getParent() {
+	return parentNode;
+}
+XMLNode* XMLNode::addChild(string str) {
+	XMLNode* childNode = new XMLNode(str, this);
+	childNodes.push_back(childNode);
+	return childNode;
+}
+XMLNode* XMLNode::getChild(unsigned int index) {
+	XMLNode* nodeReturn = nullptr;
+	try {
+		nodeReturn = childNodes[index];
+	} catch (...) {
+		// nothing
+	}
+	return nodeReturn;
+}
+
+/*
+ * XMLParser Implementation
+ */
+XMLParser::XMLParser() {
+	fileSize = filePos = 0;
+	bufferInChar[1] = 0;
 	streamBuffer = "";
-	spaceChar[0] = ' ';
-	spaceWrite = false;
 }
-bool Parser::morseBinaryToChar(ifstream& fileStreamIn,
-		ofstream& fileStreamOut) {
-	bool flag = false;
-	fileStreamIn.seekg(0, ios::end); // set the pointer to the end
-	fileSize = fileStreamIn.tellg(); // get the length of the file
-	fileStreamIn.seekg(0, ios::beg); // set the pointer to the beginning
-	for (filePos = 0; filePos < fileSize; filePos++) {
-		// read one byte at a time
-		fileStreamIn.seekg(filePos, ios::beg);
-		fileStreamIn.read(bufferInChar, 1);
-		streamBuffer.append(byteToBitString(bufferInChar[0]));
-		// keep parsing as long as letter and word spaces are found
-		while (bufferHandle()) {
-			// successfully found and parsed a morse binary
-			fileStreamOut.write(bufferOutChar, 1);
-			// check if a space needs to be written after buffer parsing
-			if (spaceWrite) {
-				spaceWrite = false;
-				fileStreamOut.write(spaceChar, 1);
-			}
-			charWritten += 2;
-		}
-		// check if a space needs to be written after no buffer parsing
-		if (spaceWrite) {
-			fileStreamOut.write(spaceChar, 1);
-		}
-		// to many bad angles, stop parsing
-		if (ignoreNum >= 3) {
-			flag = false;
-		}
-	}
-	if (charWritten > 0) {
-		flag = true;
-	}
-	return flag;
-}
-
-bool Parser::bufferHandle() {
-	bool flag = false;
-	int letterSpaceNext = bitStringFind("00");
-	int wordSpaceNext = bitStringFind("11");
-	//cout << letterSpaceNext << " " << wordSpaceNext << endl;
-	unsigned int morseEndPos;
-	// find letter and word spaces
-	if (letterSpaceNext != -1 || wordSpaceNext != -1) {
-		if ((letterSpaceNext != -1 && wordSpaceNext == -1)
-				|| (letterSpaceNext != -1 && wordSpaceNext != -1
-						&& letterSpaceNext < wordSpaceNext)) {
-			morseEndPos = (unsigned int) letterSpaceNext;
-			spaceWrite = false;
-		} else {
-			morseEndPos = (unsigned int) wordSpaceNext;
-			spaceWrite = true;
-		}
-		//cout << "streamBuffer=" << streamBuffer << endl;
-		//cout << "morseEndPos=" << morseEndPos << endl;
-		string morseBitString = streamBuffer.substr(0, morseEndPos);
-		streamBuffer.erase(0, morseEndPos + 2);
-		// morse bits extracted. maximum morse bit string is 14
-		if (morseBitString.length() > 0 && morseBitString.length() <= 14) {
-			//cout << "morseBitString=" << morseBitString << endl;
-			MorseBinary morseBinary(morseBitString);
-			if (morseBinary.toChar(bufferOutChar[0])) {
-				flag = true;
-			} else {
-				// conversion not good. let's ignore this char
-				ignoreNum++;
-			}
-		} else {
-			ignoreNum++;
-		}
-	}
-	return flag;
-}
-
-string Parser::byteToBitString(char byteIn) {
-	string bitString = "";
-	for (int i = 7; i >= 0; i--) {
-		bitString.append(to_string((byteIn >> i) & 1));
-	}
-	return bitString;
-}
-
-int Parser::bitStringFind(string space) {
-	string bufferBits2 = "";
-	int pos = -1;
-	unsigned int i, n;
-	n = streamBuffer.size();
-	for (i = 0; i < n; i++) {
-		if (i % 2 == 1) {
-			if (streamBuffer.substr(i - 1, 2) == space) {
-				return (int) (i - 1);
-			}
-		}
-	}
-	return pos;
-}
-
-bool Parser::xmlParse(istream& streamIn, XMLNode& xmlDoc) {
+bool XMLParser::documentStream(istream& streamIn, XMLNode& xmlDoc) {
 	/* <primaryAddress>[\s\S]*?<\/primaryAddress>
 	 * 1. create document node. If stack is empty then document node is the parent.
 	 * 2. grab first <tag> and add push on stack.
@@ -358,24 +300,191 @@ bool Parser::xmlParse(istream& streamIn, XMLNode& xmlDoc) {
 	 * 4. value between <child></child> is added to the node on top of the stack
 	 * 5. if </tag> found then it is popped off the stack
 	 * */
+	stack<string> documentStack;
+	string tagPop;
+	XMLNode* xmlNodeCurrent = &xmlDoc;
 	streamIn.seekg(0, ios::end); // set the pointer to the end
 	fileSize = streamIn.tellg(); // get the length of the file
 	streamIn.seekg(0, ios::beg); // set the pointer to the beginning
-	/* because we are using regex, we need to read the entire file into memory.
-	 * I personally would never use regex to parse XML, but for the assignment I will do so
-	 */
-	char XMLData[fileSize];
-	streamIn.read(XMLData, fileSize);
-	std::string XMLDataString = XMLData;
-	std::smatch m;
-	std::regex e("<[\s\S]*?>");   // matches words beginning by "sub"
-
-	while (regex_search(XMLDataString, m, e)) {
-		for (auto x : m)
-			std::cout << x << " ";
-		std::cout << std::endl;
-		s = m.suffix().str();
+	std::regex tagOpen("<[\s\S]*?>");   // matches an opening tag <tag>
+	std::regex tagEnd("<\/[\s\S]*?>");   // matches an ending tag </tag>
+	for (filePos = 0; filePos < fileSize; filePos++) {
+		// read one byte at a time
+		streamIn.seekg(filePos, ios::beg);
+		streamIn.read(bufferInChar, 1);
+		streamBuffer.append(bufferInChar);
+		if (bufferInChar[0] == '<') {
+			/* opening angle bracket for a tag
+			 * we assume that text before this is the value of current xml node
+			 */
+			xmlNodeCurrent->valueAppend(
+					streamBuffer.substr(0, streamBuffer.size() - 1));
+			streamBuffer = "<";
+		} else if (bufferInChar[0] == '>') {
+			/* ending angle bracket for a tag
+			 * let's use regex to grab the tag name between the angled brackets
+			 * let's first check if we just ended an ending tag </>
+			 */
+			std::smatch m;
+			regex_search(streamBuffer, m, tagEnd);
+			if (m.size() > 0) {
+				tagPop = "";
+				while (!documentStack.empty() && tagPop != m[0]) {
+					tagPop = documentStack.pop();
+					xmlNodeCurrent = xmlNodeCurrent->getParent();
+					if (xmlNodeCurrent == nullptr) {
+						xmlNodeCurrent = &xmlDoc;
+					}
+				}
+			} else {
+				/* now check if we just ended an opening tag <>
+				 */
+				std::smatch m;
+				regex_search(streamBuffer, m, tagOpen);
+				if (m.size() > 0) {
+					documentStack.push(m[0]);
+					xmlNodeCurrent = xmlNodeCurrent->addChild(m[0]);
+					if (xmlNodeCurrent == nullptr) {
+						xmlNodeCurrent = &xmlDoc;
+					}
+				}
+			}
+			streamBuffer = "";
+		}
 	}
+	// remaining buffer belongs to current node value
+	xmlNodeCurrent->valueAppend(streamBuffer);
+	return true;
+}
+
+/*
+ * Code39CharTable Implementation
+ */
+Code39CharTable::Code39CharTable() {
+	// Size of 128 to potentially hold ascii codes up to 128
+	charIntToCode39IntTable.resize(128);
+	try {
+		charIntToCode39IntTable[(int) ''] = 196;
+		charIntToCode39IntTable[(int) '-'] = 133;
+		charIntToCode39IntTable[(int) '+'] = 138;
+		charIntToCode39IntTable[(int) '$'] = 168;
+		charIntToCode39IntTable[(int) '%'] = 42;
+		charIntToCode39IntTable[(int) '*'] = 148;
+		charIntToCode39IntTable[(int) '.'] = 388;
+		charIntToCode39IntTable[(int) '/'] = 162;
+		charIntToCode39IntTable[(int) '0'] = 52;
+		charIntToCode39IntTable[(int) '1'] = 289;
+		charIntToCode39IntTable[(int) '2'] = 97;
+		charIntToCode39IntTable[(int) '3'] = 352;
+		charIntToCode39IntTable[(int) '4'] = 49;
+		charIntToCode39IntTable[(int) '5'] = 304;
+		charIntToCode39IntTable[(int) '6'] = 112;
+		charIntToCode39IntTable[(int) '7'] = 37;
+		charIntToCode39IntTable[(int) '8'] = 292;
+		charIntToCode39IntTable[(int) '9'] = 100;
+		charIntToCode39IntTable[(int) 'A'] = 265;
+		charIntToCode39IntTable[(int) 'B'] = 73;
+		charIntToCode39IntTable[(int) 'C'] = 328;
+		charIntToCode39IntTable[(int) 'D'] = 25;
+		charIntToCode39IntTable[(int) 'E'] = 280;
+		charIntToCode39IntTable[(int) 'F'] = 88;
+		charIntToCode39IntTable[(int) 'G'] = 13;
+		charIntToCode39IntTable[(int) 'H'] = 268;
+		charIntToCode39IntTable[(int) 'I'] = 76;
+		charIntToCode39IntTable[(int) 'J'] = 28;
+		charIntToCode39IntTable[(int) 'K'] = 259;
+		charIntToCode39IntTable[(int) 'L'] = 67;
+		charIntToCode39IntTable[(int) 'M'] = 322;
+		charIntToCode39IntTable[(int) 'N'] = 19;
+		charIntToCode39IntTable[(int) 'O'] = 274;
+		charIntToCode39IntTable[(int) 'P'] = 82;
+		charIntToCode39IntTable[(int) 'Q'] = 7;
+		charIntToCode39IntTable[(int) 'R'] = 262;
+		charIntToCode39IntTable[(int) 'S'] = 70;
+		charIntToCode39IntTable[(int) 'T'] = 22;
+		charIntToCode39IntTable[(int) 'U'] = 385;
+		charIntToCode39IntTable[(int) 'V'] = 193;
+		charIntToCode39IntTable[(int) 'W'] = 448;
+		charIntToCode39IntTable[(int) 'X'] = 145;
+		charIntToCode39IntTable[(int) 'Y'] = 400;
+		charIntToCode39IntTable[(int) 'Z'] = 208;
+	} catch (...) {
+		// nothing
+	}
+	buildCode39IntToCharTable();
+}
+
+void Code39CharTable::buildCode39IntToCharTable() {
+	unsigned int i, n, n1;
+	/* 2^9 since the longest Code 39 Binary is 9 bits */
+	Code39IntToCharTable.resize(512);
+	// build a binary int to char map
+	n = charIntToCode39IntTable.size();
+	for (i = 0; i < n; i++) {
+		if (charIntToCode39IntTable[i]
+				&& (n1 = charIntToCode39IntTable[i]) > 0) {
+			// we are worried of bits above 9
+			try {
+				Code39IntToCharTable[n1] = char(i);
+			} catch (...) {
+				// nothing
+			}
+		}
+	}
+}
+
+bool Code39CharTable::Code39IntToChar(unsigned int binaryInt, char& charOut) {
+	//cout << "binaryInt=" << binaryInt << endl;
+	try {
+		charOut = Code39IntToCharTable[binaryInt];
+		return true;
+	} catch (...) {
+		return false;
+	}
+}
+/*
+ * Code39IntItem Implementation
+ */
+Code39IntItem::Code39IntItem(string code39StringItem_,
+		Code39CharTable* code39CharTablePtr) {
+	code39StringItem = code39StringItem_;
+	code39CharTable = code39CharTablePtr;
+	unsigned int i, n;
+	for (i = 0; i < 5; i++) {
+		bitset<9> bits(code39StringItem.substr(i * 9, 9));
+		code39IntItem[i] = (unsigned int) bits.to_ulong();
+	}
+}
+
+bool Code39IntItem::toProduct(Product* productObj) {
+	string code39StringItem;
+	toString(code39StringItem);
+	productObj = productTable.at(code39StringItem);
+	return true;
+}
+bool Code39IntItem::toInt(unsigned int* code39IntItem) {
+	unsigned int i, n;
+	for (i = 0; i < 5; i++) {
+		bitset<9> bits(code39StringItem.substr(i * 9, 9));
+		code39IntItem[i] = (unsigned int) bits.to_ulong();
+	}
+	return true;
+}
+bool Code39IntItem::toString(string& code39StringItem) {
+	unsigned int i, n;
+	unsigned int code39IntItem[5];
+	toInt(code39IntItem);
+	for (i = 0; i < 5; i++) {
+		code39StringItem[i] = code39CharTable.at(code39IntItem[i]);
+	}
+	return true;
+}
+
+/*
+ * Parser Implementation
+ */
+Parser::Parser() {
+
 }
 
 /*
@@ -389,30 +498,33 @@ bool Parser::xmlParse(istream& streamIn, XMLNode& xmlDoc) {
 int main() {
 	FileHandler fh;
 	Parser parser;
-	string fileNameIn, fileNameOut;
-	ifstream fileStreamIn;
-	ofstream fileStreamOut;
-	/*cout << "Please enter the input file name and extension:" << endl;
-	 getline(cin, fileNameIn);
-	 cout << "Please enter the output file name and extension:" << endl;
-	 getline(cin, fileNameOut);*/
-	fileNameIn = "Morse.bin";
-	fileNameOut = "output.txt";
-	if (!fh.readLines(fileNameIn, fileStreamIn)
-			|| !fh.writeLines(fileNameOut, fileStreamOut)) {
-		cout << "Could not read either the input or output file." << endl;
+	XMLParser xmlparser;
+	string fileNameProducts, fileNameCarts;
+	ifstream fileStreamInProducts, fileStreamInCarts;
+	fileNameProducts = "Products.xml";
+	fileNameCarts = "Carts.xml";
+	// parse XML file streams into an XML document node
+	XMLNode ProductsXML, CartsXML;
+
+	if (!fh.readLines(fileNameProducts, fileStreamInProducts)
+			|| !fh.readLines(fileNameCarts, fileStreamInCarts)) {
+		cout << "Could not read either of the input files." << endl;
 	} else {
 		cout << "Reading file..." << endl;
 		/* we pass file streams instead of a string to this method
 		 * because we want to stream the data and decode it as we read.
 		 * This way very large files won't lag or crash the program.
 		 */
-		if (parser.morseBinaryToChar(fileStreamIn, fileStreamOut)) {
-			cout << "File successfully decoded!" << endl;
+		if (xmlparser.documentStream((istream&) fileStreamInProducts,
+				ProductsXML)
+				&& xmlparser.documentStream((istream&) fileStreamInCarts,
+						CartsXML)) {
+			cout << "XML Files successfully parsed!" << endl;
+
 		} else {
-			cout << "File could not be decoded." << endl;
+			cout << "XML Files could not be parsed." << endl;
 		}
-		fh.close(fileStreamIn, fileStreamOut);
+		fh.close((fstream&) fileStreamInProducts, (fstream&) fileStreamInCarts);
 	}
 	cout << "Enter any key to exit..." << endl;
 	string temp;
