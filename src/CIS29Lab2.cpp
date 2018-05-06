@@ -47,6 +47,7 @@ template<class K, class T>
 class HashTable {
 private:
 	vector<pair<K, T>*> table;
+	const unsigned int insertAttempts = 5;
 public:
 	HashTable();
 	HashTable(unsigned int size);
@@ -164,8 +165,12 @@ public:
 class Cart {
 private:
 	vector<Product*> productList;
-	int cartNumber;
+	unsigned int cartNumber;
 public:
+	Cart();
+	Cart(unsigned int cartNumber_);
+	~Cart() {
+	}
 	void insert(Product* productPtr);
 	string toString();
 };
@@ -202,8 +207,6 @@ public:
  Miscellaneous utilities for parsing data structures \n
  */
 class Parser {
-private:
-	Code39CharTable code39CharTable;
 public:
 	Parser();
 	~Parser() {
@@ -243,7 +246,7 @@ bool FileHandler::writeLines(string fileName, ofstream& fileStream) {
  */
 template<class K, class T>
 HashTable<K, T>::HashTable() {
-	table.resize(100);
+	table.resize(10000);
 }
 template<class K, class T>
 HashTable<K, T>::HashTable(unsigned int size) {
@@ -251,7 +254,7 @@ HashTable<K, T>::HashTable(unsigned int size) {
 }
 template<class K, class T>
 bool HashTable<K, T>::insert(K key, T val) {
-	unsigned int attempts = 3;
+	unsigned int attempts = insertAttempts;
 	K keyOriginal = key;
 	unsigned int keyInt = hash(key);
 	bool flag = false;
@@ -259,16 +262,18 @@ bool HashTable<K, T>::insert(K key, T val) {
 		if (table[keyInt] == nullptr) {
 			table[keyInt] = new pair<K, T>(keyOriginal, val);
 			flag = true;
-			cout << keyOriginal << endl;
 			break;
 		}
 		keyInt = hash(keyInt);
+		if (attempts == 1) {
+			cout << "LOST: " << keyOriginal << endl;
+		}
 	}
 	return flag;
 }
 template<class K, class T>
 T HashTable<K, T>::at(K key) {
-	unsigned int attempts = 3;
+	unsigned int attempts = insertAttempts;
 	K keyOriginal = key;
 	unsigned int keyInt = hash(key);
 	T ret;
@@ -290,17 +295,7 @@ T HashTable<K, T>::atIndex(unsigned int index) {
 	if (temp != nullptr) {
 		return temp->second;
 	} else {
-		throw "";
-	}
-	try {
-		pair<K, T>* temp = table[index];
-		if (temp != nullptr) {
-			return temp->second;
-		} else {
-			throw "";
-		}
-	} catch (...) {
-		throw "";
+		throw invalid_argument("");
 	}
 }
 template<class K, class T>
@@ -498,50 +493,50 @@ Code39CharTable::Code39CharTable() {
 	// Size of 128 to potentially hold ascii codes up to 128
 	charIntToCode39IntTable.resize(128);
 	try {
-		charIntToCode39IntTable[(int) ' '] = 196;
-		charIntToCode39IntTable[(int) '-'] = 133;
-		charIntToCode39IntTable[(int) '+'] = 138;
-		charIntToCode39IntTable[(int) '$'] = 168;
-		charIntToCode39IntTable[(int) '%'] = 42;
-		charIntToCode39IntTable[(int) '*'] = 148;
-		charIntToCode39IntTable[(int) '.'] = 388;
-		charIntToCode39IntTable[(int) '/'] = 162;
-		charIntToCode39IntTable[(int) '0'] = 52;
-		charIntToCode39IntTable[(int) '1'] = 289;
-		charIntToCode39IntTable[(int) '2'] = 97;
-		charIntToCode39IntTable[(int) '3'] = 352;
-		charIntToCode39IntTable[(int) '4'] = 49;
-		charIntToCode39IntTable[(int) '5'] = 304;
-		charIntToCode39IntTable[(int) '6'] = 112;
-		charIntToCode39IntTable[(int) '7'] = 37;
-		charIntToCode39IntTable[(int) '8'] = 292;
-		charIntToCode39IntTable[(int) '9'] = 100;
-		charIntToCode39IntTable[(int) 'A'] = 265;
-		charIntToCode39IntTable[(int) 'B'] = 73;
-		charIntToCode39IntTable[(int) 'C'] = 328;
-		charIntToCode39IntTable[(int) 'D'] = 25;
-		charIntToCode39IntTable[(int) 'E'] = 280;
-		charIntToCode39IntTable[(int) 'F'] = 88;
-		charIntToCode39IntTable[(int) 'G'] = 13;
-		charIntToCode39IntTable[(int) 'H'] = 268;
-		charIntToCode39IntTable[(int) 'I'] = 76;
-		charIntToCode39IntTable[(int) 'J'] = 28;
-		charIntToCode39IntTable[(int) 'K'] = 259;
-		charIntToCode39IntTable[(int) 'L'] = 67;
-		charIntToCode39IntTable[(int) 'M'] = 322;
-		charIntToCode39IntTable[(int) 'N'] = 19;
-		charIntToCode39IntTable[(int) 'O'] = 274;
-		charIntToCode39IntTable[(int) 'P'] = 82;
-		charIntToCode39IntTable[(int) 'Q'] = 7;
-		charIntToCode39IntTable[(int) 'R'] = 262;
-		charIntToCode39IntTable[(int) 'S'] = 70;
-		charIntToCode39IntTable[(int) 'T'] = 22;
-		charIntToCode39IntTable[(int) 'U'] = 385;
-		charIntToCode39IntTable[(int) 'V'] = 193;
-		charIntToCode39IntTable[(int) 'W'] = 448;
-		charIntToCode39IntTable[(int) 'X'] = 145;
-		charIntToCode39IntTable[(int) 'Y'] = 400;
-		charIntToCode39IntTable[(int) 'Z'] = 208;
+		charIntToCode39IntTable[(unsigned int) ' '] = 196;
+		charIntToCode39IntTable[(unsigned int) '-'] = 133;
+		charIntToCode39IntTable[(unsigned int) '+'] = 138;
+		charIntToCode39IntTable[(unsigned int) '$'] = 168;
+		charIntToCode39IntTable[(unsigned int) '%'] = 42;
+		charIntToCode39IntTable[(unsigned int) '*'] = 148;
+		charIntToCode39IntTable[(unsigned int) '.'] = 388;
+		charIntToCode39IntTable[(unsigned int) '/'] = 162;
+		charIntToCode39IntTable[(unsigned int) '0'] = 52;
+		charIntToCode39IntTable[(unsigned int) '1'] = 289;
+		charIntToCode39IntTable[(unsigned int) '2'] = 97;
+		charIntToCode39IntTable[(unsigned int) '3'] = 352;
+		charIntToCode39IntTable[(unsigned int) '4'] = 49;
+		charIntToCode39IntTable[(unsigned int) '5'] = 304;
+		charIntToCode39IntTable[(unsigned int) '6'] = 112;
+		charIntToCode39IntTable[(unsigned int) '7'] = 37;
+		charIntToCode39IntTable[(unsigned int) '8'] = 292;
+		charIntToCode39IntTable[(unsigned int) '9'] = 100;
+		charIntToCode39IntTable[(unsigned int) 'A'] = 265;
+		charIntToCode39IntTable[(unsigned int) 'B'] = 73;
+		charIntToCode39IntTable[(unsigned int) 'C'] = 328;
+		charIntToCode39IntTable[(unsigned int) 'D'] = 25;
+		charIntToCode39IntTable[(unsigned int) 'E'] = 280;
+		charIntToCode39IntTable[(unsigned int) 'F'] = 88;
+		charIntToCode39IntTable[(unsigned int) 'G'] = 13;
+		charIntToCode39IntTable[(unsigned int) 'H'] = 268;
+		charIntToCode39IntTable[(unsigned int) 'I'] = 76;
+		charIntToCode39IntTable[(unsigned int) 'J'] = 28;
+		charIntToCode39IntTable[(unsigned int) 'K'] = 259;
+		charIntToCode39IntTable[(unsigned int) 'L'] = 67;
+		charIntToCode39IntTable[(unsigned int) 'M'] = 322;
+		charIntToCode39IntTable[(unsigned int) 'N'] = 19;
+		charIntToCode39IntTable[(unsigned int) 'O'] = 274;
+		charIntToCode39IntTable[(unsigned int) 'P'] = 82;
+		charIntToCode39IntTable[(unsigned int) 'Q'] = 7;
+		charIntToCode39IntTable[(unsigned int) 'R'] = 262;
+		charIntToCode39IntTable[(unsigned int) 'S'] = 70;
+		charIntToCode39IntTable[(unsigned int) 'T'] = 22;
+		charIntToCode39IntTable[(unsigned int) 'U'] = 385;
+		charIntToCode39IntTable[(unsigned int) 'V'] = 193;
+		charIntToCode39IntTable[(unsigned int) 'W'] = 448;
+		charIntToCode39IntTable[(unsigned int) 'X'] = 145;
+		charIntToCode39IntTable[(unsigned int) 'Y'] = 400;
+		charIntToCode39IntTable[(unsigned int) 'Z'] = 208;
 	} catch (...) {
 		// nothing
 	}
@@ -550,6 +545,15 @@ Code39CharTable::Code39CharTable() {
 
 void Code39CharTable::buildCode39IntToCharTable() {
 	unsigned int i, n, n1;
+	/* extend to lower case characters */
+	n = ((int) 'Z') + 1;
+	for (i = (int) 'A'; i < n; i++) {
+		if (charIntToCode39IntTable[i]
+				&& (n1 = charIntToCode39IntTable[i]) > 0) {
+			charIntToCode39IntTable[(unsigned int) tolower(char(i))] =
+					charIntToCode39IntTable[i];
+		}
+	}
 	/* 2^9 since the longest Code 39 Binary is 9 bits */
 	Code39IntToCharTable.resize(512);
 	// build a binary int to char map
@@ -620,6 +624,8 @@ bool ProductTable::insert(Product* val) {
 	code39Item.setCodeString(val->getName().substr(0, 5));
 	string code39BinaryString;
 	if (code39Item.toBinaryString(code39BinaryString)) {
+		/*cout << val->getName().substr(0, 5) << " = " << code39BinaryString
+		 << endl;*/
 		returnValue = code39ItemToProductTable.insert(code39BinaryString, val);
 	}
 	return returnValue;
@@ -645,6 +651,12 @@ string ProductTable::toString() {
 /*
  * Cart Implementation
  */
+Cart::Cart() {
+	cartNumber = 0;
+}
+Cart::Cart(unsigned int cartNumber_) {
+	cartNumber = cartNumber_;
+}
 void Cart::insert(Product* productPtr) {
 	productList.push_back(productPtr);
 }
@@ -670,7 +682,7 @@ void CartList::insert(Cart* cartPtr) {
 }
 string CartList::toString() {
 	string str = "";
-	str.append(" Cart List ").append("-----------");
+	str.append(" Cart List \n-----------\n");
 	unsigned int i, n;
 	n = cartList.size();
 	try {
@@ -720,6 +732,7 @@ bool Code39Item::toCodeString(string& code39CharItem) {
 			code39CharItem.append(temp);
 			intQueue.pop();
 		}
+		returnValue = true;
 	}
 	return returnValue;
 }
@@ -732,6 +745,7 @@ bool Code39Item::toBinaryString(string& code39CharItem) {
 			code39CharItem.append(bits.to_string());
 			intQueue.pop();
 		}
+		returnValue = true;
 	}
 	return returnValue;
 }
@@ -766,7 +780,7 @@ bool Parser::productListXMLNodetoObject(XMLNode& productListXMLNode,
 bool Parser::cartListXMLNodetoObject(XMLNode& cartListXMLNode,
 		CartList& cartListObject, ProductTable& productTableObject) {
 	bool returnValue = false;
-	unsigned int i, j, n, n1;
+	unsigned int i, j, n, n1, cartNumber;
 	XMLNode* nodeXMLCarts, *nodeCart, *nodeItem;
 	Cart* cartPtr;
 	// XMLCarts level
@@ -777,7 +791,17 @@ bool Parser::cartListXMLNodetoObject(XMLNode& cartListXMLNode,
 		for (i = 0; i < n; i++) {
 			nodeCart = nodeXMLCarts->getChild(i);
 			if (nodeCart != nullptr) {
-				cartPtr = new Cart();
+				/* extract the cart number
+				 * stoi could throw exceptions
+				 */
+				try {
+					cartNumber = (unsigned int) stoi(
+							nodeCart->getName().substr(4,
+									nodeCart->getName().length()));
+				} catch (...) {
+					cartNumber = 0;
+				}
+				cartPtr = new Cart(cartNumber);
 				// Assume all children are items
 				n1 = nodeCart->childrenSize();
 				for (j = 0; j < n1; j++) {
@@ -817,7 +841,7 @@ int main() {
 	/* XML input files are here */
 	fileNameProducts = "Products.xml";
 	fileNameCarts = "Carts.xml";
-// parse XML file streams into an XML document node
+	// parse XML file streams into an XML document node
 	XMLNode ProductsXML, CartsXML;
 	ProductTable productTable;
 	CartList cartList;

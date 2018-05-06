@@ -4,8 +4,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>315</x>
-      <y>351</y>
+      <x>414</x>
+      <y>81</y>
       <w>441</w>
       <h>261</h>
     </coordinates>
@@ -74,12 +74,12 @@ bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>522</x>
-      <y>603</y>
-      <w>36</w>
-      <h>63</h>
+      <y>333</y>
+      <w>135</w>
+      <h>333</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
-    <additional_attributes>10.0;50.0;20.0;10.0</additional_attributes>
+    <additional_attributes>10.0;350.0;130.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -95,8 +95,8 @@ bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>351</x>
-      <y>207</y>
+      <x>9</x>
+      <y>315</y>
       <w>351</w>
       <h>126</h>
     </coordinates>
@@ -108,14 +108,14 @@ FileHandler()
 ~FileHandler()
 bool readLines(string fileName, ifstream&amp; fileStream)
 bool writeLines(string fileName, ofstream&amp; fileStream)
-bool close(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)</panel_attributes>
+bool close(ifstream&amp; fileStream)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>0</x>
-      <y>261</y>
+      <x>36</x>
+      <y>36</y>
       <w>243</w>
       <h>72</h>
     </coordinates>
@@ -123,6 +123,30 @@ bool close(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)</panel_attri
 Lab 2 - Containers and Regex
 Code3of9 Symbology in XML Container
 By: Branden Lee</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>9</x>
+      <y>153</y>
+      <w>351</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>HashTable&lt;class K, class T&gt;
+--
+vector&lt;pair&lt;K, T&gt;*&gt; table
+const unsigned int insertAttempts = 5
+--
+HashTable();
+HashTable(unsigned int size)
+~HashTable()
+bool insert(K key, T val)
+T at(K key)
+T atIndex(unsigned int index)
+unsigned int hash(K key)
+unsigned int hash(unsigned int key)
+unsigned int size()</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
