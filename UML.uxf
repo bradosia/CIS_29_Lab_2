@@ -4,99 +4,89 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>414</x>
-      <y>81</y>
-      <w>441</w>
-      <h>261</h>
+      <x>423</x>
+      <y>72</y>
+      <w>702</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>Parser
 --
-unsigned int fileSize
-unsigned int filePos
-unsigned int charWritten
-unsigned int ignoreNum
-char bufferInChar[2]
-char bufferOutChar[2]
-char spaceChar[2]
-string streamBuffer
-bool spaceWrite
+
 --
 Parser()
 ~Parser()
-bool morseBinaryToChar(ifstream&amp; fileStreamIn, ofstream&amp; fileStreamOut)
-bool bufferHandle()
-string byteToBitString(char byteIn)
-int bitStringFind(string space)
-bool xmlParse(istream&amp; streamIn, XMLNode&amp; xmlDoc)</panel_attributes>
+bool productListXMLNodetoObject(XMLNode&amp; productListXMLNode, ProductTable&amp; productTableObject)
+bool cartListXMLNodetoObject(XMLNode&amp; cartListXMLNode, CartList&amp; cartListObject, ProductTable&amp; productTableObject)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>351</x>
-      <y>810</y>
+      <x>495</x>
+      <y>207</y>
       <w>351</w>
       <h>153</h>
     </coordinates>
-    <panel_attributes>MorseBinaryCharTable
+    <panel_attributes>ProductTable 
 --
-vector&lt;string&gt; charIntToBinaryStringTable
-vector&lt;char&gt; binaryIntToCharTable
-const string dashBinary = "01"
-const string dotBinary = "10"
+Code39CharTable code39CharTable
+HashTable&lt;string, Product*&gt; code39ItemToProductTable
 --
-MorseBinaryCharTable()
-~MorseBinaryCharTable()
-void buildBinaryIntToCharTable();
-bool binaryIntToChar(unsigned int binaryInt, char&amp; charOut);</panel_attributes>
+ProductTable()
+~ProductTable()
+bool insert(string key, Product* val)
+bool insert(Product* val)
+Product* at(string key)
+string toString()</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>360</x>
-      <y>648</y>
+      <x>837</x>
+      <y>720</y>
       <w>324</w>
-      <h>126</h>
+      <h>144</h>
     </coordinates>
-    <panel_attributes>MorseBinary
+    <panel_attributes>Code39CharTable
 --
-unsigned int binaryInt
-MorseBinaryCharTable binaryCharTable
+vector&lt;unsigned int&gt; charIntToCode39IntTable
+vector&lt;char&gt; Code39IntToCharTable
 --
-MorseBinary(string morse)
-~MorseBinary()
-bool toChar(char&amp; charOut)
-bool bitStringToInt(string morse, unsigned int&amp; intOut)</panel_attributes>
+Code39CharTable()
+~Code39CharTable()
+void buildCode39IntToCharTable()
+bool intToChar(unsigned int intIn, char&amp; charOut)
+bool charToInt(char charIn, unsigned int&amp; intOut)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>522</x>
-      <y>333</y>
-      <w>135</w>
-      <h>333</h>
+      <x>783</x>
+      <y>351</y>
+      <w>99</w>
+      <h>180</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
-    <additional_attributes>10.0;350.0;130.0;10.0</additional_attributes>
+    <additional_attributes>90.0;180.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>522</x>
-      <y>765</y>
+      <x>675</x>
+      <y>351</y>
       <w>27</w>
-      <h>63</h>
+      <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
-      <y>315</y>
+      <x>0</x>
+      <y>99</y>
       <w>351</w>
       <h>126</h>
     </coordinates>
@@ -114,8 +104,8 @@ bool close(ifstream&amp; fileStream)</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>36</x>
-      <y>36</y>
+      <x>135</x>
+      <y>0</y>
       <w>243</w>
       <h>72</h>
     </coordinates>
@@ -128,17 +118,17 @@ By: Branden Lee</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
-      <y>153</y>
+      <x>450</x>
+      <y>612</y>
       <w>351</w>
       <h>144</h>
     </coordinates>
-    <panel_attributes>HashTable&lt;class K, class T&gt;
+    <panel_attributes>HashTable&lt;K keyType, T valueType&gt;
 --
 vector&lt;pair&lt;K, T&gt;*&gt; table
 const unsigned int insertAttempts = 5
 --
-HashTable();
+HashTable()
 HashTable(unsigned int size)
 ~HashTable()
 bool insert(K key, T val)
@@ -148,5 +138,221 @@ unsigned int hash(K key)
 unsigned int hash(unsigned int key)
 unsigned int size()</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>405</y>
+      <w>432</w>
+      <h>279</h>
+    </coordinates>
+    <panel_attributes>XMLNode
+--
+string name
+string value
+vector&lt;XMLNode*&gt; childNodes
+XMLNode* parentNode
+--
+XMLNode()
+XMLNode(string name_, XMLNode* parentNode_)
+~XMLNode()
+void valueAppend(string str)
+string getName()
+string getValue()
+XMLNode* getParent()
+XMLNode* addChild(string str)
+XMLNode* getChild(unsigned int index)
+bool findChild(string name_, XMLNode*&amp; returnNode, unsigned int index)
+unsigned int childrenSize()
+unsigned int findChildSize(string name_)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>243</y>
+      <w>432</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>XMLParser
+--
+unsigned int fileSize
+unsigned int filePos
+char bufferInChar[2]
+string streamBuffer
+--
+XMLParser()
+~XMLParser()
+bool documentStream(istream&amp; streamIn, XMLNode&amp; xmlDoc)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>585</x>
+      <y>423</y>
+      <w>216</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>Product
+--
+string name
+double price
+--
+ProductTable()
+~ProductTable()
+bool insert(string key, Product* val)
+bool insert(Product* val)
+Product* at(string key)
+string toString()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>522</x>
+      <y>351</y>
+      <w>27</w>
+      <h>279</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;290.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>837</x>
+      <y>513</y>
+      <w>324</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>Code39Item
+--
+Code39CharTable* code39CharTable
+string binaryString, codeString
+queue&lt;int&gt; intQueue
+--
+Code39Item(Code39CharTable* code39CharTablePtr)
+~Code39Item()
+void setBinaryString(string binaryString_)
+void setCodeString(string codeString_)
+bool toCodeString(string&amp; code39CharItem)
+bool toBinaryString(string&amp; code39CharItem)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>882</x>
+      <y>207</y>
+      <w>171</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>CartList
+--
+vector&lt;Cart*&gt; cartList
+--
+void insert(Cart* cardPtr)
+string toString()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>873</x>
+      <y>324</y>
+      <w>198</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>Cart
+--
+vector&lt;Product*&gt; productList
+unsigned int cartNumber
+--
+Cart()
+Cart(unsigned int cartNumber_)
+~Cart()
+void insert(Product* productPtr)
+string toString()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>792</x>
+      <y>423</y>
+      <w>99</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>963</x>
+      <y>279</y>
+      <w>27</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>216</x>
+      <y>369</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>657</x>
+      <y>171</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>963</x>
+      <y>171</y>
+      <w>27</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>999</x>
+      <y>675</y>
+      <w>27</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>423</x>
+      <y>171</y>
+      <w>81</w>
+      <h>306</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;320.0;70.0;10.0</additional_attributes>
   </element>
 </diagram>
