@@ -179,6 +179,10 @@ class CartList {
 private:
 	vector<Cart*> cartList;
 public:
+	CartList() {
+	}
+	~CartList() {
+	}
 	void insert(Cart* cardPtr);
 	string toString();
 };
