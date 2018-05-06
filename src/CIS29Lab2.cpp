@@ -258,7 +258,8 @@ bool HashTable<K, T>::insert(K key, T val) {
 	for (; attempts > 0; attempts--) {
 		if (table[keyInt] == nullptr) {
 			table[keyInt] = new pair<K, T>(keyOriginal, val);
-
+			flag = true;
+			cout << keyOriginal << endl;
 			break;
 		}
 		keyInt = hash(keyInt);
@@ -285,11 +286,19 @@ T HashTable<K, T>::at(K key) {
 }
 template<class K, class T>
 T HashTable<K, T>::atIndex(unsigned int index) {
-	try {
-		cout << "hey" << endl;
-		pair<K, T>* temp = table[index];
-		cout << "hey---------------------" << endl;
+	pair<K, T>* temp = table[index];
+	if (temp != nullptr) {
 		return temp->second;
+	} else {
+		throw "";
+	}
+	try {
+		pair<K, T>* temp = table[index];
+		if (temp != nullptr) {
+			return temp->second;
+		} else {
+			throw "";
+		}
 	} catch (...) {
 		throw "";
 	}
@@ -621,17 +630,15 @@ Product* ProductTable::at(string key) {
 string ProductTable::toString() {
 	string str = "";
 	str.append(" Product Table \n---------------\n");
-	cout << str;
 	unsigned int i, n;
 	n = code39ItemToProductTable.size();
-	try {
-		for (i = 0; i < n; i++) {
+	for (i = 0; i < n; i++) {
+		try {
 			str.append(code39ItemToProductTable.atIndex(i)->toString()).append(
 					"\n");
-			cout << str;
-		}
-	} catch (...) {
+		} catch (...) {
 
+		}
 	}
 	return str;
 }
