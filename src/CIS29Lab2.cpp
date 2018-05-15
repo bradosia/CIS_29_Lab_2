@@ -8,6 +8,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>     // std::cout
+#include <sstream>
+#include <iomanip>
 #include <vector>       // std::vector
 #include <bitset>
 #include <list>
@@ -34,8 +36,9 @@ public:
 	 @param string File name to open
 	 @return True on file open successful and false in not
 	 */
-	bool readLines(string fileName, ifstream& fileStream);
-	bool writeLines(string fileName, ofstream& fileStream);
+	bool readStream(string fileName, ifstream& fileStream);
+	bool writeStream(string fileName, ofstream& fileStream);
+	bool writeString(string fileName, string stringValue);
 	bool close(ifstream& fileStream);
 };
 
@@ -47,7 +50,7 @@ template<class K, class T>
 class HashTable {
 private:
 	vector<pair<K, T>*> table;
-	const unsigned int insertAttempts = 5;
+	unsigned int insertAttempts;
 public:
 	HashTable();
 	HashTable(unsigned int size);
@@ -59,6 +62,7 @@ public:
 	unsigned int hash(K key);
 	unsigned int hash(unsigned int key);
 	unsigned int size();
+	bool resize(unsigned int key);
 };
 
 /**
@@ -130,9 +134,9 @@ private:
 public:
 	Product(string name_, double price_);
 	~Product() {
-
 	}
 	string getName();
+	double getPrice();
 	string toString();
 };
 
@@ -166,12 +170,14 @@ class Cart {
 private:
 	vector<Product*> productList;
 	unsigned int cartNumber;
+	double priceTotal;
 public:
 	Cart();
 	Cart(unsigned int cartNumber_);
 	~Cart() {
 	}
 	void insert(Product* productPtr);
+	void calculatePriceTotal();
 	string toString();
 };
 
@@ -229,17 +235,28 @@ bool FileHandler::close(ifstream& fileStream) {
 	return true;
 }
 
-bool FileHandler::readLines(string fileName, ifstream& fileStream) {
-	fileStream.open(fileName, ios::binary); // Use it to read from a file named data.txt.
+bool FileHandler::readStream(string fileName, ifstream& fileStream) {
+	fileStream.open(fileName, ios::binary);
 	if (fileStream.is_open()) {
 		return true;
 	}
 	return false;
 }
 
-bool FileHandler::writeLines(string fileName, ofstream& fileStream) {
-	fileStream.open(fileName); // Use it to read from a file named data.txt.
+bool FileHandler::writeStream(string fileName, ofstream& fileStream) {
+	fileStream.open(fileName);
 	if (fileStream.is_open()) {
+		return true;
+	}
+	return false;
+}
+
+bool FileHandler::writeString(string fileName, string stringValue) {
+	ofstream fileStream;
+	fileStream.open(fileName);
+	if (fileStream.is_open()) {
+		fileStream << stringValue;
+		fileStream.close();
 		return true;
 	}
 	return false;
@@ -250,12 +267,10 @@ bool FileHandler::writeLines(string fileName, ofstream& fileStream) {
  */
 template<class K, class T>
 HashTable<K, T>::HashTable() {
-	table.resize(10000);
+	table.resize(100);
+	insertAttempts = 10;
 }
-template<class K, class T>
-HashTable<K, T>::HashTable(unsigned int size) {
-	table.resize(size);
-}
+
 template<class K, class T>
 bool HashTable<K, T>::insert(K key, T val) {
 	unsigned int attempts = insertAttempts;
@@ -269,9 +284,6 @@ bool HashTable<K, T>::insert(K key, T val) {
 			break;
 		}
 		keyInt = hash(keyInt);
-		if (attempts == 1) {
-			cout << "LOST: " << keyOriginal << endl;
-		}
 	}
 	return flag;
 }
@@ -304,22 +316,34 @@ T HashTable<K, T>::atIndex(unsigned int index) {
 }
 template<class K, class T>
 unsigned int HashTable<K, T>::hash(K key) {
-	unsigned int hash = 5381;
+	unsigned int hash = 1315423911;
 	unsigned int i = 0;
-	unsigned int c;
 	while (key[i++]) {
-		c = key[i];
-		hash = ((hash << 5) + hash) + c;
+		hash ^= ((hash << 5) + key[i] + (hash >> 2));
 	}
-	return hash % table.size();
+	return (hash & 0x7FFFFFFF) % table.size();
 }
 template<class K, class T>
 unsigned int HashTable<K, T>::hash(unsigned int key) {
-	return (key * 2654435761) % table.size();
+	// stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key
+	key = ((key >> 16) ^ key) * 0x45d9f3b;
+	key = ((key >> 16) ^ key) * 0x45d9f3b;
+	key = (key >> 16) ^ key;
+	return key % table.size();
 }
 template<class K, class T>
 unsigned int HashTable<K, T>::size() {
 	return table.size();
+}
+
+template<class K, class T>
+bool HashTable<K, T>::resize(unsigned int key) {
+	bool flag = false;
+	if (key > table.size()) {
+		table.resize(key);
+		flag = true;
+	}
+	return flag;
 }
 
 /*
@@ -607,17 +631,21 @@ Product::Product(string name_, double price_) {
 string Product::getName() {
 	return name;
 }
+double Product::getPrice() {
+	return price;
+}
 string Product::toString() {
-	string str = "";
-	str.append(name).append(": ").append(to_string(price));
-	return str;
+	// I'm using string stream so I don't need to reinvent console spacing.
+	stringstream str;
+	str << left << setw(20) << name << " " << fixed << setprecision(2) << price;
+	return str.str();
 }
 
 /*
  * ProductTable Implementation
  */
 ProductTable::ProductTable() {
-
+	code39ItemToProductTable.resize(1700);
 }
 bool ProductTable::insert(string key, Product* val) {
 	return code39ItemToProductTable.insert(key, val);
@@ -640,6 +668,9 @@ Product* ProductTable::at(string key) {
 string ProductTable::toString() {
 	string str = "";
 	str.append(" Product Table \n---------------\n");
+	stringstream headString, endString;
+	headString << left << setw(20) << "Product Name" << " Price" << endl;
+	str.append(headString.str());
 	unsigned int i, n;
 	n = code39ItemToProductTable.size();
 	for (i = 0; i < n; i++) {
@@ -657,25 +688,43 @@ string ProductTable::toString() {
  */
 Cart::Cart() {
 	cartNumber = 0;
+	priceTotal = 0;
 }
 Cart::Cart(unsigned int cartNumber_) {
 	cartNumber = cartNumber_;
+	priceTotal = 0;
 }
 void Cart::insert(Product* productPtr) {
 	productList.push_back(productPtr);
 }
+void Cart::calculatePriceTotal() {
+	unsigned int i, n;
+	n = productList.size();
+	priceTotal = 0;
+	for (i = 0; i < n; i++) {
+		priceTotal += productList.at(i)->getPrice();
+	}
+}
 string Cart::toString() {
 	string str = "";
-	str.append("Cart #").append(to_string(cartNumber)).append(": ");
+	stringstream headString, endString;
+	calculatePriceTotal();
+	str.append("Cart #").append(to_string(cartNumber)).append("\n");
+	headString << left << setw(20) << "Product Name" << " Price" << endl;
+	str.append(headString.str());
 	unsigned int i, n;
 	n = productList.size();
 	try {
 		for (i = 0; i < n; i++) {
-			str.append(productList[i]->toString()).append(", ");
+			str.append(productList[i]->toString()).append("\n");
 		}
 	} catch (...) {
 		//nothing
 	}
+	endString << left << setfill('-') << setw(30) << "" << endl << setfill(' ')
+			<< setw(21) << "Total Price" << fixed << setprecision(2)
+			<< priceTotal << endl << setfill('-') << setw(30) << "";
+	str.append(endString.str());
 	return str;
 }
 /*
@@ -691,7 +740,7 @@ string CartList::toString() {
 	n = cartList.size();
 	try {
 		for (i = 0; i < n; i++) {
-			str.append(cartList[i]->toString()).append("\n");
+			str.append(cartList[i]->toString()).append("\n\n");
 		}
 	} catch (...) {
 		//nothing
@@ -772,9 +821,14 @@ bool Parser::productListXMLNodetoObject(XMLNode& productListXMLNode,
 			if (nodeBarcodeList->findChild("Product", nodeProduct, i)) {
 				if (nodeProduct->findChild("Name", nodeName, 0)
 						&& nodeProduct->findChild("Price", nodePrice, 0)) {
-					productTableObject.insert(
+					if (!productTableObject.insert(
 							new Product(nodeName->getValue(),
-									stod(nodePrice->getValue())));
+									stod(nodePrice->getValue())))) {
+						// too many hash collisions. discard product.
+						cout
+								<< "ERROR! Too many collisions. Product Discarded: "
+								<< nodeName->getValue() << endl;
+					}
 				}
 			}
 		}
@@ -830,27 +884,32 @@ bool Parser::cartListXMLNodetoObject(XMLNode& cartListXMLNode,
 /*
  * main & interface
  * Rules For Decoding:
- * - it is assumed all morse binary strings end with a letter space or word space
- * - only morse binary strings matching the pre-built table can be decoded
- * - morse binary strings a length 0 <= x <= 14 will be ignored
- * - after ignoring 3 bad morse binary strings the parsing will stop
+ * - Product and Carts XML are parsed using a generic XML parser
+ * - Products are taken from the product XML object and inserted into the product hash table
+ * - first 5 letters of product name converted to code39 binary string to use as hash table key
+ * - Carts are taken from the cart XML object and reference the product object from the hash table
+ * - Cart item code39 binary string used as key for product hash table to find product object
+ * - Carts are inserted with product object references into carts list
+ * - Carts list calculates the cart price
+ * - Carts list converted to a string for writing to a file
  */
 int main() {
 	FileHandler fh;
 	Parser parser;
 	XMLParser xmlparser;
-	string fileNameProducts, fileNameCarts;
+	string fileNameProducts, fileNameCarts, fileNameCartsList;
 	ifstream fileStreamInProducts, fileStreamInCarts;
 	bool flag = false;
 	/* XML input files are here */
 	fileNameProducts = "Products.xml";
 	fileNameCarts = "Carts.xml";
+	fileNameCartsList = "cartsList.txt";
 	// parse XML file streams into an XML document node
 	XMLNode ProductsXML, CartsXML;
 	ProductTable productTable;
 	CartList cartList;
-	if (!fh.readLines(fileNameProducts, fileStreamInProducts)
-			|| !fh.readLines(fileNameCarts, fileStreamInCarts)) {
+	if (!fh.readStream(fileNameProducts, fileStreamInProducts)
+			|| !fh.readStream(fileNameCarts, fileStreamInCarts)) {
 		cout << "Could not read either of the input files." << endl;
 	} else {
 		cout << "Reading file..." << endl;
@@ -870,15 +929,21 @@ int main() {
 		// close the XML files
 		fh.close(fileStreamInProducts);
 		fh.close(fileStreamInCarts);
-		// create the product table from the product list XML
-		if (flag) {
-			if (parser.productListXMLNodetoObject(ProductsXML, productTable)) {
-				cout << productTable.toString();
-				// populate the cart list object with reference to the product list
-				if (parser.cartListXMLNodetoObject(CartsXML, cartList,
-						productTable)) {
-					cout << cartList.toString();
-				}
+	}
+	// create the product table from the product list XML
+	if (flag) {
+		flag = false;
+		if (parser.productListXMLNodetoObject(ProductsXML, productTable)) {
+			fh.writeString("productList.txt", productTable.toString());
+			flag = true;
+		}
+	}
+	// process each cart from the XML file referencing each product from the product table
+	if (flag) {
+		if (parser.cartListXMLNodetoObject(CartsXML, cartList, productTable)) {
+			if (fh.writeString(fileNameCartsList, cartList.toString())) {
+				cout << "Carts list written to \"" << fileNameCartsList << "\""
+						<< endl;
 			}
 		}
 	}
